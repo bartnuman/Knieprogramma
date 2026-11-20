@@ -217,7 +217,9 @@ class MainActivity : Activity() {
             }
         }
         videoFrame.addView(web, FrameLayout.LayoutParams(-1, -1))
-        page.addView(videoFrame, LinearLayout.LayoutParams(-1, 0, 1f).apply { minimumHeight = dp(190) })
+        //page.addView(videoFrame, LinearLayout.LayoutParams(-1, 0, 1f).apply { minimumHeight = dp(190) })
+        videoFrame.minimumHeight = dp(190)
+        page.addView(videoFrame, LinearLayout.LayoutParams(-1, 0, 1f))
         loadVideo(web, if (showingAlternative) exercise.altVideoId ?: exercise.videoId else exercise.videoId)
 
         addGap(page, 12)
