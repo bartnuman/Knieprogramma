@@ -85,6 +85,11 @@ class MainActivity : Activity() {
         Phase(3, "Veerkracht", "2–3× per week · klein blok", "Alleen starten als de knie 2+ weken volledig stil is. Piekbelasting leren opvangen.", listOf(
             Exercise("Pogo hops (twee benen)", "3 × 20 (later: één been)", "lz6BM6WyJ0k"),
             Exercise("Sprongetjes vooruit, zachte landing", "3 × 10", "sGGegRzf1AE")
+        )),
+        Phase(4, "Oefeningen Fysio", "volgens schema van je fysiotherapeut", "Aanvullende oefeningen vanuit de fysiotherapie.", listOf(
+            Exercise("Single leg bridge", "3 × 10", "AVAXhy6pl7o"),
+            Exercise("Banded clam shell", "3 × 10 per kant", "Hj-2r7OlXuE"),
+            Exercise("Side lying straight leg hip abduction", "3 × 10 per kant", "nwvkWrn2hRg", hint = "Eventueel uitvoeren met een weerstandsband boven de knieën.")
         ))
     )
 
@@ -147,7 +152,7 @@ class MainActivity : Activity() {
                 isFocusable = true
                 setOnClickListener { startPhase(index) }
             }
-            card.addView(text("FASE ${phase.number}", 12f, ACCENT, true))
+            card.addView(text(if (phase.number == 4) "EXTRA PROGRAMMA" else "FASE ${phase.number}", 12f, ACCENT, true))
             addGap(card, 5)
             card.addView(text(phase.title, 21f, WHITE, true))
             addGap(card, 7)
@@ -160,7 +165,8 @@ class MainActivity : Activity() {
             addGap(card, 12)
             card.addView(text("▶ Start (${phase.exercises.size} oefeningen)", 15f, GREEN, true))
             addGap(card, 5)
-            val last = prefs.getString("last_${phase.number}", null)
+            val progressKey = if (phase.number == 4) "last_fysio" else "last_${phase.number}"
+            val last = prefs.getString(progressKey, null)
             card.addView(text(if (last == null) "Laatst gedaan: Nog niet gedaan" else "Laatst gedaan: $last", 12f, 0xFF94A3B8.toInt()))
             content.addView(card, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(14) })
         }
@@ -191,6 +197,10 @@ class MainActivity : Activity() {
         page.addView(text(exercise.name, 25f, WHITE, true))
         addGap(page, 5)
         page.addView(text(exercise.dose, 16f, MUTED))
+        if (exercise.hint.isNotBlank()) {
+            addGap(page, 5)
+            page.addView(text(exercise.hint, 13f, ACCENT))
+        }
         addGap(page, 16)
 
         val videoFrame = FrameLayout(this).apply { background = rounded(Color.BLACK, 14); clipToOutline = true }
@@ -217,7 +227,6 @@ class MainActivity : Activity() {
             }
         }
         videoFrame.addView(web, FrameLayout.LayoutParams(-1, -1))
-        //page.addView(videoFrame, LinearLayout.LayoutParams(-1, 0, 1f).apply { minimumHeight = dp(190) })
         videoFrame.minimumHeight = dp(190)
         page.addView(videoFrame, LinearLayout.LayoutParams(-1, 0, 1f))
         loadVideo(web, if (showingAlternative) exercise.altVideoId ?: exercise.videoId else exercise.videoId)
@@ -281,13 +290,15 @@ class MainActivity : Activity() {
         val page = column(24).apply { gravity = Gravity.CENTER }
         page.addView(text("🎉", 66f).apply { gravity = Gravity.CENTER })
         addGap(page, 16)
-        page.addView(text("Fase ${phases[currentPhase].number} klaar!", 29f, WHITE, true).apply { gravity = Gravity.CENTER })
+        val completedTitle = if (phases[currentPhase].number == 4) "Oefeningen Fysio klaar!" else "Fase ${phases[currentPhase].number} klaar!"
+        page.addView(text(completedTitle, 29f, WHITE, true).apply { gravity = Gravity.CENTER })
         addGap(page, 10)
         page.addView(text("Alle ${phases[currentPhase].exercises.size} oefeningen gedaan.", 16f, MUTED).apply { gravity = Gravity.CENTER })
         addGap(page, 36)
         page.addView(button("⏹ Stop – naar hoofdmenu", RED) {
             val date = SimpleDateFormat("dd-MM-yyyy", Locale("nl", "NL")).format(Date())
-            prefs.edit().putString("last_${phases[currentPhase].number}", date).apply()
+            val progressKey = if (phases[currentPhase].number == 4) "last_fysio" else "last_${phases[currentPhase].number}"
+            prefs.edit().putString(progressKey, date).apply()
             showHome()
         }, LinearLayout.LayoutParams(-1, dp(56)))
         addGap(page, 12)
